@@ -6,9 +6,9 @@ In this experiment, CGANs (Conditional Generative Adversarial Networks) are trai
 
 ## Dataset
 
-A dataset is generated accroding to the following logic.
+A dataset is generated according to the following logic.
 
-Let us consider sets that contain integer numbers from 1 to `k`. Every such set can be represented as a list of length `k` containing only 0 and 1. For example, if `k = 3`, set `{2}` can be represented as `[0, 1, 0]` and if `k = 4` it can be represented as `[0, 1, 0, 0]`.
+Let us consider sets that contain integer numbers from 1 to `k`. Every such set can be represented as a list of length `k` containing only zeros and ones. For example, if `k = 3`, set `{2}` can be represented as `[0, 1, 0]` and if `k = 4` it can be represented as `[0, 1, 0, 0]`.
 
 Each object from the dataset is represented with `2k` binary features. Also, each object from the dataset is sampled from a probabilistic distribution that imposes the following property: if the `i`-th feature (where `1 <= i <= k`) is 1, then the `(i + k)`-th feature must be 1 too. Actually, such property means that the set represented by the first `k` elements of the object representation is a subset of the set represented by the last `k` elements of the object representation.
 
