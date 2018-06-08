@@ -41,7 +41,7 @@ def create_placeholders(
 def discriminator(
         discriminator_input: tf.Tensor, layer_sizes: List[int],
         reuse: bool = False
-        ) -> Tuple[tf.Tensor, tf.Tensor]:
+        ) -> tf.Tensor:
     """
     Run input through discriminator network.
 
