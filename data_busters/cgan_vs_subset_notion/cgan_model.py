@@ -19,7 +19,7 @@ def create_placeholders(
         n_items: int, z_dim: int
         ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """
-    Create all required placeholders.
+    Create placeholders for inputs and hyperparameters.
 
     :param n_items:
         number of unique items such that sets are constructed from them
