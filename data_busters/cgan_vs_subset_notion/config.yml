@@ -3,12 +3,12 @@
 
 data:
     size: 500000
-    n_items: 4
+    n_items: 8
 
 generator:
-    z_dim: 1
+    z_dim: 2
     layer_sizes:
-        - 3
+        - 4
 
 discriminator:
     layer_sizes: []
@@ -18,3 +18,4 @@ optimization:
     batch_size: 64
     learning_rate: 0.00005
     beta_one: 0.5
+    flip_prob: 0.1

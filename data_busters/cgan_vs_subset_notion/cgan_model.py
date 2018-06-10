@@ -127,7 +127,8 @@ def generator(
 
 def losses(
         real_input: tf.Tensor, generator_input: tf.Tensor,
-        d_layer_sizes: List[int], g_layer_sizes: List[int]
+        d_layer_sizes: List[int], g_layer_sizes: List[int],
+        flip_prob: float
         ) -> Tuple[tf.Tensor, tf.Tensor]:
     """
     Compute the loss for the discriminator and the generator.
@@ -140,6 +141,8 @@ def losses(
         sizes of layers of the discriminator
     :param g_layer_sizes:
         sizes of layers of the generator
+    :param flip_prob:
+        probability to flip labels for discriminator
     :return:
         discriminator loss and generator loss
     """
@@ -152,16 +155,23 @@ def losses(
     d_logits_fake = discriminator(fake_input, d_layer_sizes, reuse=True)
 
     # Compute discriminator loss.
+    outcome = np.random.uniform()
+    if outcome > flip_prob:
+        real_labels = tf.ones_like(d_logits_real)
+        fake_labels = tf.zeros_like(d_logits_fake)
+    else:
+        real_labels = tf.zeros_like(d_logits_real)
+        fake_labels = tf.ones_like(d_logits_fake)
     d_loss_real = tf.reduce_mean(
         tf.nn.sigmoid_cross_entropy_with_logits(
             logits=d_logits_real,
-            labels=tf.ones_like(d_logits_real)
+            labels=real_labels
         )
     )
     d_loss_fake = tf.reduce_mean(
         tf.nn.sigmoid_cross_entropy_with_logits(
             logits=d_logits_fake,
-            labels=tf.zeros_like(d_logits_fake)
+            labels=fake_labels
         )
     )
     d_loss = d_loss_real + d_loss_fake
@@ -247,8 +257,8 @@ def evaluate_generator_output(
     for i in range(samples.shape[0]):
         if show_samples:
             print(f"Condition: {conditions[i, :].tolist()}")
-            print(f"Binary sample: {binary_samples[i, :].tolist()}\n")
-            print(f"Sample: {samples[i, :].tolist()}")
+            print(f"Binary sample: {binary_samples[i, :].tolist()}")
+            print(f"Sample: {samples[i, :].tolist()}\n")
         if (conditions[i, :] - binary_samples[i, :]).max() == 0:
             score += 1
     score /= samples.shape[0]
@@ -259,7 +269,8 @@ def evaluate_generator_output(
 def train(
         dataset: np.ndarray, n_items: int, z_dim: int,
         d_layer_sizes: List[int], g_layer_sizes: List[int],
-        n_epochs: int, batch_size: int, learning_rate: float, beta_one: float
+        n_epochs: int, batch_size: int, learning_rate: float, beta_one: float,
+        flip_prob: float
         ) -> List[float]:
     """
     Train generator and discriminator.
@@ -286,12 +297,14 @@ def train(
     :param beta_one:
         exponential decay rate for the first moment in the ADAM
         optimizer
+    :param flip_prob:
+        probability to flip labels for discriminator
     :return:
         history of generated samples scores
     """
     real_input, generator_input, lr = create_placeholders(n_items, z_dim)
     d_loss, g_loss = losses(
-        real_input, generator_input, d_layer_sizes, g_layer_sizes
+        real_input, generator_input, d_layer_sizes, g_layer_sizes, flip_prob
     )
     d_op, g_op = optimization_operations(d_loss, g_loss, lr, beta_one)
 

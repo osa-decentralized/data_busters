@@ -7,7 +7,7 @@ Author: Nikolay Lysenko
 
 import argparse
 import os
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 import yaml
 import matplotlib.pyplot as plt
@@ -64,7 +64,8 @@ def main():
         setup['optimization']['n_epochs'],
         setup['optimization']['batch_size'],
         setup['optimization']['learning_rate'],
-        setup['optimization']['beta_one']
+        setup['optimization']['beta_one'],
+        setup['optimization']['flip_prob']
     )
     plt.plot(scores)
     plt.show()
