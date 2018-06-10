@@ -211,7 +211,7 @@ def optimization_operations(
 
 def evaluate_generator_output(
         sess: tf.Session, real_batch: np.ndarray, z_dim: int,
-        generator_input: tf.Tensor, layer_sizes: List[int]
+        generator_input: tf.Tensor, layer_sizes: List[int], show_samples: bool
         ) -> type(None):
     """
     Print sets created by the generator and evaluate their
@@ -229,34 +229,38 @@ def evaluate_generator_output(
         placeholder for generator input
     :param layer_sizes:
         sizes of layers of the network
+    :param show_samples:
+        if `True`, conditions and generated sets are printed
     :return:
         None
     """
     generator_batch = training_set.turn_into_generator_batch(real_batch, z_dim)
     n_items = real_batch.shape[1] // 2
+    conditions = real_batch[:, :n_items].astype(np.int32)
     samples = sess.run(
         generator(generator_input, n_items, layer_sizes, is_applied=True),
         feed_dict={generator_input: generator_batch}
     )
-    samples = np.around(samples).astype(np.int32)
+    binary_samples = np.around(samples).astype(np.int32)
 
     score = 0
     for i in range(samples.shape[0]):
-        condition_items = real_batch[i, :n_items].tolist()
-        print(f"Condition: {', '.join(condition_items)}")
-        sample_items = samples[i, :].tolist()
-        print(f"Sample: {', '.join(sample_items)}")
-        if len(set(condition_items) - set(sample_items)) == 0:
+        if show_samples:
+            print(f"Condition: {conditions[i, :].tolist()}")
+            print(f"Binary sample: {binary_samples[i, :].tolist()}\n")
+            print(f"Sample: {samples[i, :].tolist()}")
+        if (conditions[i, :] - binary_samples[i, :]).max() == 0:
             score += 1
     score /= samples.shape[0]
-    print(f"Plausibility score is {score}.")
+    print(f"Plausibility score is {score}.\n\n")
+    return score
 
 
 def train(
         dataset: np.ndarray, n_items: int, z_dim: int,
         d_layer_sizes: List[int], g_layer_sizes: List[int],
         n_epochs: int, batch_size: int, learning_rate: float, beta_one: float
-        ) -> type(None):
+        ) -> List[float]:
     """
     Train generator and discriminator.
 
@@ -283,7 +287,7 @@ def train(
         exponential decay rate for the first moment in the ADAM
         optimizer
     :return:
-        None
+        history of generated samples scores
     """
     real_input, generator_input, lr = create_placeholders(n_items, z_dim)
     d_loss, g_loss = losses(
@@ -294,6 +298,7 @@ def train(
     batch_i = 1
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        scores = []
         for epoch_i in range(n_epochs):
             real_batches = training_set.yield_real_batches(
                 dataset, batch_size
@@ -341,8 +346,11 @@ def train(
                         f"generator train loss: {g_train_loss}"
                     )
                 if batch_i % 1000 == 1:
-                    evaluate_generator_output(
-                        sess, real_batch[:10, :],
-                        z_dim, generator_input, g_layer_sizes
+                    score = evaluate_generator_output(
+                        sess, real_batch,
+                        z_dim, generator_input, g_layer_sizes,
+                        show_samples=(batch_i % 10000 == 1)
                     )
+                    scores.append(score)
                 batch_i += 1
+    return scores
