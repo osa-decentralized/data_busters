@@ -7,9 +7,10 @@ Author: Nikolay Lysenko
 
 import argparse
 import os
-from typing import Dict, Any
+from typing import List, Dict, Any
 
 import yaml
+import matplotlib.pyplot as plt
 
 from data_busters.cgan_vs_subset_notion import cgan_model, training_set
 
@@ -54,7 +55,7 @@ def main():
     dataset = training_set.generate_data(
         setup['data']['size'], setup['data']['n_items']
     )
-    cgan_model.train(
+    scores = cgan_model.train(
         dataset,
         setup['data']['n_items'],
         setup['generator']['z_dim'],
@@ -65,6 +66,8 @@ def main():
         setup['optimization']['learning_rate'],
         setup['optimization']['beta_one']
     )
+    plt.plot(scores)
+    plt.show()
 
 
 if __name__ == '__main__':
