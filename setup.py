@@ -26,7 +26,5 @@ setup(
     keywords='cgan discrete',
     packages=find_packages(exclude=['docs', 'tests', 'ci']),
     python_requires='>=3.6',
-    install_requires=[
-        'numpy', 'pandas', 'scipy', 'tensorflow', 'PyYAML', 'tqdm'
-    ]
+    install_requires=['numpy', 'tensorflow', 'PyYAML', 'matplotlib']
 )
