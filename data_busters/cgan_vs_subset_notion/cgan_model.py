@@ -9,10 +9,9 @@ Author: Nikolay Lysenko
 from typing import List, Tuple
 
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 
-from data_busters.cgan_vs_subset_notion import batching 
+from data_busters.cgan_vs_subset_notion import training_set
 
 
 def create_placeholders(
@@ -233,7 +232,7 @@ def evaluate_generator_output(
     :return:
         None
     """
-    generator_batch = batching.turn_into_generator_batch(real_batch, z_dim)
+    generator_batch = training_set.turn_into_generator_batch(real_batch, z_dim)
     n_items = real_batch.shape[1] // 2
     samples = sess.run(
         generator(generator_input, n_items, layer_sizes, is_applied=True),
@@ -254,15 +253,16 @@ def evaluate_generator_output(
 
 
 def train(
-        df: pd.DataFrame, n_items: int, z_dim: int,
+        dataset: np.ndarray, n_items: int, z_dim: int,
         d_layer_sizes: List[int], g_layer_sizes: List[int],
         n_epochs: int, batch_size: int, learning_rate: float, beta_one: float
         ) -> type(None):
     """
     Train generator and discriminator.
 
-    :param df:
-        dataframe with column 'sets'
+    :param dataset:
+        training set of the form described in `README.md` file from
+        the current directory
     :param n_items:
         number of unique items such that sets are constructed from them
     :param z_dim:
@@ -295,13 +295,13 @@ def train(
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch_i in range(n_epochs):
-            real_batches = batching.yield_real_batches(
-                df, batch_size, n_items
+            real_batches = training_set.yield_real_batches(
+                dataset, batch_size
             )
             for real_batch in real_batches:
                 # Training
-                real_batch = batching.blur_real_batch(real_batch)
-                generator_batch = batching.turn_into_generator_batch(
+                real_batch = training_set.blur_real_batch(real_batch)
+                generator_batch = training_set.turn_into_generator_batch(
                     real_batch, z_dim
                 )
                 _ = sess.run(
