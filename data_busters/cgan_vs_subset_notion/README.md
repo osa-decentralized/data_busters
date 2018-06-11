@@ -13,3 +13,10 @@ Let us consider sets that contain integer numbers from 1 to `k`. Every such set 
 Each object from the dataset is represented with `2k` binary features. Also, each object from the dataset is sampled from a probabilistic distribution that imposes the following property: if the `i`-th feature (where `1 <= i <= k`) is 1, then the `(i + k)`-th feature must be 1 too. Actually, such property means that the set represented by the first `k` elements of the object representation is a subset of the set represented by the last `k` elements of the object representation.
 
 The first `k` features are used for conditioning in CGANs under consideration. Given such partial description of an object, generator must sample the last `k` features of the object. To solve this problem correctly, CGAN must grasp the notion of subset.
+
+## Usage
+
+The only Python script that should be executed directly is `experiment.py`. By default, settings are read from `experiment.yml` config, but it can be changed like this:
+```
+python experiment.py -c path/to/another/config.yml
+```
