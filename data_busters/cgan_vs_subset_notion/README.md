@@ -16,7 +16,7 @@ The first `k` features are used for conditioning in CGANs under consideration. G
 
 ## Usage
 
-The only Python script that should be executed directly is `experiment.py`. By default, settings are read from `experiment.yml` config, but it can be changed like this:
+The only Python script that should be executed directly is `experiment.py`. By default, settings are read from `config.yml` file, but it can be changed like this:
 ```
-python experiment.py -c path/to/another/config.yml
+python experiment.py -c path/to/another/file.yml
 ```
